@@ -1,5 +1,6 @@
 package ro.pub.cs.systems.eim.practicaltest01var03;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -14,6 +15,22 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class PracticalTest01Var03MainActivity extends AppCompatActivity {
+    private int number1;
+    private int number2;
+    private String operation;
+    int result;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "Correct", Toast.LENGTH_SHORT).show();
+            } else if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(this, "Incorrect", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -57,7 +74,6 @@ public class PracticalTest01Var03MainActivity extends AppCompatActivity {
                 String number1Text = number1EditText.getText().toString();
                 String number2Text = number2EditText.getText().toString();
 
-                int number1, number2;
                 try {
                     number1 = Integer.parseInt(number1Text);
                     number2 = Integer.parseInt(number2Text);
@@ -66,8 +82,6 @@ public class PracticalTest01Var03MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                int result;
-                String operation;
                 if (v.getId() == R.id.addButton) {
                     result = number1 + number2;
                     operation = "+";
@@ -82,5 +96,15 @@ public class PracticalTest01Var03MainActivity extends AppCompatActivity {
 
         addButton.setOnClickListener(buttonClickListener);
         subtractButton.setOnClickListener(buttonClickListener);
+        Button switchActivityButton = findViewById(R.id.switchActivityButton);
+        switchActivityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(PracticalTest01Var03MainActivity.this, PracticalTest01Var03SecondaryActivity.class);
+                intent.putExtra("result", number1 + " " + operation + " " + number2 + " = " + result);
+                startActivityForResult(intent, 1);
+            }
+        });
+
     }
 }
