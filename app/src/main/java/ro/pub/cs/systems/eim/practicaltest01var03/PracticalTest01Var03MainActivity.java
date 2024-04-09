@@ -1,7 +1,10 @@
 package ro.pub.cs.systems.eim.practicaltest01var03;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,10 +18,15 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class PracticalTest01Var03MainActivity extends AppCompatActivity {
+    private IntentFilter intentFilter = new IntentFilter();
+    private Intent serviceIntent = null;
+    private PracticalTest01Var03BroadcastReceiver messageBroadcastReceiver;
+    private TextView messageTextView;
     private int number1;
     private int number2;
     private String operation;
     int result;
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -31,6 +39,50 @@ public class PracticalTest01Var03MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    @Override
+    public void onRestart() {
+        super.onRestart();
+        Log.d("practical", "onRestart() method was invoked");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d("practical", "onStart() method was invoked");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        registerReceiver(messageBroadcastReceiver, intentFilter);
+        Log.d("practical", "onResume() method was invoked");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver(messageBroadcastReceiver);
+        Log.d("practical", "onPause() method was invoked");
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d("practical", "onStop() method was invoked");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("practical", "onDestroy() method was invoked");
+        if (serviceIntent != null) {
+            stopService(serviceIntent);
+            serviceIntent = null;
+        }
+    }
+
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -91,7 +143,12 @@ public class PracticalTest01Var03MainActivity extends AppCompatActivity {
                 }
 
                 resultLabel.setText(number1 + " " + operation + " " + number2 + " = " + result);
+                Intent intent = new Intent(getApplicationContext(), PracticalTest01Var03Service.class);
+                intent.putExtra("number1", number1);
+                intent.putExtra("number2", number2);
+                startService(intent);
             }
+
         };
 
         addButton.setOnClickListener(buttonClickListener);
@@ -102,9 +159,17 @@ public class PracticalTest01Var03MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(PracticalTest01Var03MainActivity.this, PracticalTest01Var03SecondaryActivity.class);
                 intent.putExtra("result", number1 + " " + operation + " " + number2 + " = " + result);
-                startActivityForResult(intent, 1);
+                startService(intent);
             }
         });
+        messageTextView = (TextView)findViewById(R.id.message_text_view);
+        messageTextView.setMovementMethod(new ScrollingMovementMethod());
+
+        messageBroadcastReceiver = new PracticalTest01Var03BroadcastReceiver(messageTextView);
+
+        for (int index = 0; index < 2; index++) {
+            intentFilter.addAction(Constant.actions[index]);
+        }
 
     }
 }
